@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#3D0B18"/>
+  <path d="M14 58V27C14 17 24 11 32 6c8 5 18 11 18 21v31" fill="none" stroke="#D6B370" stroke-width="2.4"/>
+  <text x="32" y="44" text-anchor="middle" font-family="Didot, 'Bodoni 72', Georgia, serif" font-style="italic" font-size="22" fill="#F5ECDD">I&amp;K</text>
+</svg>

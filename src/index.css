@@ -1,0 +1,200 @@
+@import 'tailwindcss';
+@import 'lenis/dist/lenis.css';
+
+/* Design tokens: colours, fonts and easing used across the site. */
+@theme {
+  --color-ink: #0e0a0c;
+  --color-night: #170e13;
+  --color-wine: #2e0911;
+  --color-maroon: #5c1222;
+  --color-sindoor: #c8382b;
+  --color-marigold: #efa02f;
+  --color-gold: #d6b370;
+  --color-gold-deep: #a9843f;
+  --color-ivory: #f5ecdd;
+  --color-paper: #efe4d0;
+
+  --font-display: 'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-deva: 'Tiro Devanagari Hindi', 'Noto Serif Devanagari', serif;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background: var(--color-ink);
+    color: var(--color-ivory);
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-marigold);
+    color: var(--color-ink);
+  }
+
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--color-marigold);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  img {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
+
+/* Light film-grain texture over the whole page. */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, 1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Hide the normal cursor only when our custom cursor is on (mouse devices). */
+@media (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor a,
+  html.has-cursor button {
+    cursor: none;
+  }
+  html.has-cursor input,
+  html.has-cursor textarea {
+    cursor: text;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  /* Cuts an element into the palace-arch shape (defined in SvgDefs). */
+  .arch {
+    -webkit-clip-path: url(#arch-ogee);
+    clip-path: url(#arch-ogee);
+  }
+
+  .arch-round {
+    border-radius: 999px 999px 0 0;
+  }
+
+  .text-outline {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px currentColor;
+  }
+
+  .paper {
+    background-color: var(--color-paper);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(169, 132, 63, 0.18), transparent 60%);
+    color: var(--color-ink);
+  }
+
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+  }
+
+  .shine {
+    background: linear-gradient(110deg, #a9843f 10%, #f6dfa4 35%, #d6b370 50%, #fff3cf 62%, #a9843f 85%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 7s linear infinite;
+  }
+}
+
+@keyframes shine {
+  to { background-position: -220% 0; }
+}
+
+.marquee-track {
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
+}
+.marquee-track.reverse {
+  animation-direction: reverse;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scale(1, 1) rotate(-1deg); opacity: 1; }
+  25% { transform: scale(0.96, 1.06) rotate(1.5deg); opacity: 0.94; }
+  50% { transform: scale(1.03, 0.97) rotate(-2deg); opacity: 1; }
+  75% { transform: scale(0.98, 1.04) rotate(1deg); opacity: 0.96; }
+}
+
+.flame {
+  transform-origin: 50% 90%;
+  animation: flicker 1.6s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.spin-slow {
+  animation: spin-slow 120s linear infinite;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Turn off CSS animations for people who prefer less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
