@@ -3,6 +3,7 @@ import { ArrowUp, Copy, Phone } from 'lucide-react'
 import { useRef } from 'react'
 import { contacts, couple, wedding } from '../data/wedding'
 import { copyText } from '../lib/storage'
+import { weddingYear } from '../lib/text'
 import { Lotus, Sparkle } from '../components/ui/Ornaments'
 import { useSmoothScroll, useToast } from '../context'
 
@@ -16,8 +17,8 @@ export default function Footer() {
   const spread = useTransform(scrollYProgress, [0, 1], ['-0.06em', '-0.03em'])
 
   const copyTag = async () => {
-    await copyText(couple.hashtag)
-    toast(`${couple.hashtag} copied — tag us in every photo!`)
+    const ok = await copyText(couple.hashtag)
+    toast(ok ? `${couple.hashtag} copied — tag us in every photo!` : 'Could not copy, please select the text')
   }
 
   return (
@@ -34,7 +35,7 @@ export default function Footer() {
         >
           Your presence is the only gift we seek. Come for the pheras, stay for the jalebis, leave with our love.
         </motion.p>
-        <p className="eyebrow mt-8 text-gold">With love · the Rathore &amp; Malhotra families</p>
+        <p className="eyebrow mt-8 text-gold">With love · the {couple.families} families</p>
       </div>
 
       <motion.h2
@@ -102,7 +103,7 @@ export default function Footer() {
           <a href="https://unsplash.com/" target="_blank" rel="noreferrer" className="underline-offset-4 hover:text-gold hover:underline">
             Unsplash
           </a>{' '}
-          · © 2026 The Rathore &amp; Malhotra families
+          · © {weddingYear} The {couple.families} families
         </p>
       </div>
     </footer>

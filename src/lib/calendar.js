@@ -1,10 +1,33 @@
 // Builds calendar files and Google Calendar / Google Maps links for the events.
 import { couple, venues } from '../data/wedding'
+import { slug } from './text'
 
 const toUtcStamp = (iso) =>
   new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 
 const escapeIcs = (text) => text.replace(/\\/g, '\\\\').replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n')
+
+// Calendar files allow at most 75 bytes per line; longer lines continue on the next
+// line after a space. Counts bytes (not letters) and never splits a character.
+const encoder = new TextEncoder()
+function fold(line) {
+  const parts = []
+  let current = ''
+  let bytes = 0
+  for (const ch of line) {
+    const size = encoder.encode(ch).length
+    const limit = parts.length ? 74 : 75 // continuation lines start with a space
+    if (bytes + size > limit) {
+      parts.push(current)
+      current = ''
+      bytes = 0
+    }
+    current += ch
+    bytes += size
+  }
+  parts.push(current)
+  return parts.join('\r\n ')
+}
 
 function describe(event) {
   const venue = venues[event.venue]
@@ -35,7 +58,7 @@ function buildIcs(eventList) {
     const { title, location, details } = describe(event)
     return [
       'BEGIN:VEVENT',
-      `UID:${event.id}-2026@ishaani-weds-kabir`,
+      `UID:${event.id}-${event.start.slice(0, 4)}@${slug}`,
       `DTSTAMP:${now}`,
       `DTSTART:${toUtcStamp(event.start)}`,
       `DTEND:${toUtcStamp(event.end)}`,
@@ -45,11 +68,13 @@ function buildIcs(eventList) {
       'END:VEVENT',
     ]
   })
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Utsavy//Wedding Invite//EN', 'CALSCALE:GREGORIAN', ...body, 'END:VCALENDAR'].join('\r\n')
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Utsavy//Wedding Invite//EN', 'CALSCALE:GREGORIAN', ...body, 'END:VCALENDAR']
+    .map(fold)
+    .join('\r\n')
 }
 
 // Downloads a .ics file that Apple Calendar, Outlook and others can import.
-export function downloadIcs(eventList, filename = 'ishaani-kabir-wedding.ics') {
+export function downloadIcs(eventList, filename = `${slug}-wedding.ics`) {
   const blob = new Blob([buildIcs(eventList)], { type: 'text/calendar;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

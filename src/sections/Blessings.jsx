@@ -1,16 +1,16 @@
 import { animate, AnimatePresence, motion, useInView } from 'framer-motion'
 import { Flame, Send } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { blessingsSeed, images } from '../data/wedding'
-import { load, save } from '../lib/storage'
+import { blessingsSeed, diyaCount, images } from '../data/wedding'
+import { load, save, storageKey } from '../lib/storage'
+import { coupleNames } from '../lib/text'
 import Picture from '../components/ui/Picture'
 import Marquee from '../components/ui/Marquee'
 import RevealText from '../components/ui/RevealText'
 import { useToast } from '../context'
 
-const DIYA_KEY = 'ishaani-kabir:diya'
-const BLESSINGS_KEY = 'ishaani-kabir:blessings'
-const BASE_DIYAS = 1247
+const DIYA_KEY = storageKey('diya')
+const BLESSINGS_KEY = storageKey('blessings')
 
 // Clay lamp drawn in SVG; the flame appears when `lit` is true.
 function Diya({ lit }) {
@@ -184,9 +184,9 @@ export default function Blessings() {
             <span className="sr-only">{lit ? 'Your diya is lit' : 'Light a diya for the couple'}</span>
           </button>
           <p className="mt-2 font-display text-5xl text-ivory sm:text-6xl">
-            <Counter value={BASE_DIYAS + (lit ? 1 : 0)} />
+            <Counter value={diyaCount + (lit ? 1 : 0)} />
           </p>
-          <p className="eyebrow mt-3 text-gold">diyas lit for Ishaani & Kabir</p>
+          <p className="eyebrow mt-3 text-gold">diyas lit for {coupleNames}</p>
           <AnimatePresence mode="wait">
             {lit ? (
               <motion.p key="lit" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 font-serif text-xl text-ivory/80 italic">

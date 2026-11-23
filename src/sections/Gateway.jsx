@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Music2, VolumeX } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { couple, wedding } from '../data/wedding'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import { ArchOutline, JaaliPattern, Sparkle } from '../components/ui/Ornaments'
 import Magnetic from '../components/ui/Magnetic'
 import { useSmoothScroll } from '../context'
@@ -126,6 +127,11 @@ function WaxSeal() {
 export default function Gateway({ onOpen, onDone }) {
   const [opening, setOpening] = useState(false)
   const { lock, unlock } = useSmoothScroll()
+  const dialogRef = useRef(null)
+  const openRef = useRef(null)
+
+  // Keyboard focus starts on "Open the doors" and stays on the doors until they open.
+  useFocusTrap(!opening, [dialogRef], openRef)
 
   useEffect(() => {
     lock()
@@ -140,6 +146,7 @@ export default function Gateway({ onOpen, onDone }) {
 
   return (
     <motion.div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label="Wedding invitation — open the doors"
@@ -232,7 +239,7 @@ export default function Gateway({ onOpen, onDone }) {
               transition={{ delay: 1.4, duration: 1 }}
               className="mt-3 flex items-center gap-3 text-sm tracking-[0.2em] text-ivory/70"
             >
-              <Sparkle size={8} className="text-gold" /> {wedding.shortDate} <Sparkle size={8} className="text-gold" /> UDAIPUR
+              <Sparkle size={8} className="text-gold" /> {wedding.shortDate} <Sparkle size={8} className="text-gold" /> {wedding.place.toUpperCase()}
             </motion.p>
 
             <motion.div
@@ -243,6 +250,7 @@ export default function Gateway({ onOpen, onDone }) {
             >
               <Magnetic>
                 <button
+                  ref={openRef}
                   type="button"
                   onClick={() => enter(true)}
                   className="group relative flex items-center gap-3 overflow-hidden rounded-full bg-gold px-8 py-4 text-[0.78rem] font-bold tracking-[0.2em] text-ink uppercase shadow-[0_0_40px_rgba(214,179,112,0.35)] transition-transform active:scale-95"

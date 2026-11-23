@@ -219,4 +219,10 @@ npm run build
 
 The page is ready for Vercel. I push the code to GitHub, import the repo in Vercel and click **Deploy**. Or from the terminal:
 
+```bash
+npx vercel --prod
+```
+
+To collect RSVPs on a server, add `VITE_RSVP_ENDPOINT` in the Vercel project's environment variables before deploying (see the README).
+
 ---

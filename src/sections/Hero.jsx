@@ -6,6 +6,8 @@ import Petals from '../components/ui/Petals'
 import Picture from '../components/ui/Picture'
 import RevealText from '../components/ui/RevealText'
 import { useSmoothScroll } from '../context'
+import { HERO_SIZES, HERO_WIDTHS } from '../lib/images'
+import { toRoman, weddingYear } from '../lib/text'
 
 const EASE = [0.22, 1, 0.36, 1]
 
@@ -64,10 +66,10 @@ export default function Hero({ play, burst }) {
         >
           <Picture
             id={images.hero}
-            alt="Lake Pichola and the Lake Palace in Udaipur at dusk"
+            alt={images.heroAlt}
             priority
-            sizes="(min-width: 1024px) 30vw, 70vw"
-            widths={[600, 900, 1300, 1800]}
+            sizes={HERO_SIZES}
+            widths={HERO_WIDTHS}
             className="arch absolute inset-0"
             imgClassName="object-[62%_center]"
             imgStyle={{ scale: imageScale }}
@@ -115,13 +117,13 @@ export default function Hero({ play, burst }) {
         </motion.p>
       </motion.div>
 
-            <motion.p
+      <motion.p
         initial={{ opacity: 0 }}
         animate={play ? { opacity: 1 } : {}}
         transition={{ delay: 2.4, duration: 1 }}
         className="eyebrow absolute top-1/2 left-6 z-30 hidden -translate-y-1/2 rotate-180 text-ivory/50 [writing-mode:vertical-rl] lg:block"
       >
-        The wedding of · MMXXVI
+        The wedding of · {toRoman(weddingYear)}
       </motion.p>
 
       {/* Date, scroll hint and place along the bottom */}
@@ -152,8 +154,8 @@ export default function Hero({ play, burst }) {
           </span>
         </button>
         <div className="text-right">
-          <p className="eyebrow text-gold">Udaipur</p>
-          <p className="mt-1.5 font-display text-sm text-ivory/90 sm:text-base">Rajasthan, India</p>
+          <p className="eyebrow text-gold">{wedding.place}</p>
+          <p className="mt-1.5 font-display text-sm text-ivory/90 sm:text-base">{wedding.region}</p>
         </div>
       </motion.div>
     </section>

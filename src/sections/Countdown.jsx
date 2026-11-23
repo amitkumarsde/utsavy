@@ -1,7 +1,9 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useInView } from 'framer-motion'
 import { CalendarPlus, Download } from 'lucide-react'
+import { useRef } from 'react'
 import { events, wedding } from '../data/wedding'
 import { downloadIcs, googleCalendarUrl } from '../lib/calendar'
+import { numberWord } from '../lib/text'
 import { useCountdown } from '../hooks/useCountdown'
 import { Mandala, Sparkle } from '../components/ui/Ornaments'
 import Button from '../components/ui/Button'
@@ -53,12 +55,16 @@ function Unit({ value, label, deva, delay }) {
 
 // Live countdown to the pheras, with buttons to save the dates to a calendar.
 export default function Countdown() {
-  const time = useCountdown(wedding.date)
+  const ref = useRef(null)
+  // Only tick while the section is on (or near) the screen.
+  const inView = useInView(ref, { margin: '200px 0px' })
+  const time = useCountdown(wedding.date, inView)
   const toast = useToast()
-  const vivah = events.find((e) => e.id === 'vivah')
+  // The event that contains the main ceremony time
+  const main = events.find((e) => e.start <= wedding.date && wedding.date <= e.end) ?? events[0]
 
   return (
-    <section id="countdown" className="relative overflow-hidden bg-maroon py-28 sm:py-40">
+    <section id="countdown" ref={ref} className="relative overflow-hidden bg-maroon py-28 sm:py-40">
       <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_50%_50%,rgba(200,56,43,0.35),transparent_70%),linear-gradient(180deg,#2e0911_0%,transparent_30%,transparent_70%,#2e0911_100%)]" />
       <div className="pointer-events-none absolute top-1/2 left-1/2 w-[150vmin] -translate-x-1/2 -translate-y-1/2">
         <Mandala className="spin-slow w-full text-gold/13" />
@@ -92,11 +98,11 @@ export default function Countdown() {
           <span className="h-px flex-1 bg-linear-to-l from-transparent to-gold/60" />
         </div>
         <p className="mt-6 font-serif text-xl text-ivory/85 italic sm:text-2xl">
-          Shubh muhurat · {wedding.displayDate} · 7:12 PM IST
+          Shubh muhurat · {wedding.displayDate} · {wedding.time}
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Button href={googleCalendarUrl(vivah)} icon={CalendarPlus} variant="gold">
+          <Button href={googleCalendarUrl(main)} icon={CalendarPlus} variant="gold">
             Google Calendar
           </Button>
           <Button
@@ -105,7 +111,7 @@ export default function Countdown() {
             className="text-ivory"
             onClick={() => {
               downloadIcs(events)
-              toast('All five celebrations saved to your calendar')
+              toast(`All ${numberWord(events.length)} celebrations saved to your calendar`)
             }}
           >
             Apple / Outlook (.ics)

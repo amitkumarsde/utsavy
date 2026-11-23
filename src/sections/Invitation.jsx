@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
-import { couple, families, invitationText, wedding } from '../data/wedding'
+import { couple, families, invitationAccents, invitationText, venues, wedding } from '../data/wedding'
 import { ArchEdge, Divider, Lotus } from '../components/ui/Ornaments'
 
 // Round date badge whose text ring turns as you scroll.
@@ -8,7 +8,7 @@ function DateSeal() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
   const rotate = useTransform(scrollYProgress, [0, 1], [-90, 200])
-  const text = 'TWELVE DECEMBER ✦ TWO THOUSAND TWENTY SIX ✦ UDAIPUR ✦ '
+  const text = wedding.sealText
 
   return (
     <div ref={ref} className="relative size-36 sm:size-44">
@@ -25,8 +25,8 @@ function DateSeal() {
       </motion.svg>
       <div className="absolute inset-[22%] grid place-items-center rounded-full bg-maroon text-paper shadow-[inset_0_0_0_4px_rgba(239,228,208,0.15)]">
         <div className="text-center leading-none">
-          <span className="block font-display text-3xl italic sm:text-4xl">12</span>
-          <span className="eyebrow mt-1 block text-[0.55rem]! tracking-[0.25em]! opacity-80">Dec</span>
+          <span className="block font-display text-3xl italic sm:text-4xl">{wedding.day}</span>
+          <span className="eyebrow mt-1 block text-[0.55rem]! tracking-[0.25em]! opacity-80">{wedding.month}</span>
         </div>
       </div>
     </div>
@@ -98,7 +98,7 @@ export default function Invitation() {
               {couple.groom.first}
             </p>
             <p className="mt-3 text-ink/60">
-              {wedding.displayDate} · The Oberoi Udaivilas, {wedding.city}
+              {wedding.displayDate} · {venues[wedding.venue].name}, {wedding.city}
             </p>
           </motion.div>
         </div>
@@ -112,7 +112,6 @@ function InvitationCopy() {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.55'] })
   const words = invitationText.split(' ')
-  const accents = ['pheras', 'pichola,', 'moon.', 'one']
 
   return (
     <p
@@ -122,7 +121,7 @@ function InvitationCopy() {
       <span className="sr-only">{invitationText}</span>
       {words.map((word, i) => (
         <Word key={i} progress={scrollYProgress} range={[i / words.length, (i + 1) / words.length]}>
-          <span className={accents.includes(word.toLowerCase()) ? 'font-serif text-[1.1em] text-sindoor italic' : undefined}>{word}</span>
+          <span className={invitationAccents.includes(word.toLowerCase()) ? 'font-serif text-[1.1em] text-sindoor italic' : undefined}>{word}</span>
         </Word>
       ))}
     </p>

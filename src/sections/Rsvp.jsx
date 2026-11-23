@@ -3,13 +3,14 @@ import { CalendarPlus, Check, LoaderCircle, MessageCircle, Minus, Pencil, Plus, 
 import { useId, useState } from 'react'
 import { couple, events, wedding } from '../data/wedding'
 import { downloadIcs } from '../lib/calendar'
-import { load, save } from '../lib/storage'
+import { hasServer, rsvpClosed, rsvpMessage, sendRsvp, whatsAppLink } from '../lib/rsvp'
+import { load, save, storageKey } from '../lib/storage'
 import Button from '../components/ui/Button'
 import RevealText from '../components/ui/RevealText'
 import { Lotus, Sparkle } from '../components/ui/Ornaments'
 import { useToast } from '../context'
 
-const STORAGE_KEY = 'ishaani-kabir:rsvp'
+const STORAGE_KEY = storageKey('rsvp')
 const MEALS = ['Vegetarian', 'Jain', 'Non-vegetarian']
 const EMPTY = {
   name: '',
@@ -68,13 +69,50 @@ function Field({ label, error, children, htmlFor }) {
 const inputClass =
   'mt-2 w-full border-0 border-b border-ink/20 bg-transparent px-0 py-3 font-display text-xl text-ink placeholder:text-ink/30 transition-colors focus:border-maroon focus:outline-none'
 
-// Thank-you card shown after the RSVP is sent.
-function Success({ data, onEdit }) {
+// Round stamp at the top of the result cards.
+function Stamp({ label }) {
+  return (
+    <motion.div
+      initial={{ scale: 2.4, rotate: -30, opacity: 0 }}
+      animate={{ scale: 1, rotate: -8, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.15 }}
+      className="grid size-28 place-items-center rounded-full border-2 border-dashed border-sindoor/70 text-sindoor"
+    >
+      <div className="text-center">
+        <Check size={30} className="mx-auto" strokeWidth={2.2} />
+        <span className="eyebrow mt-1 block text-[0.55rem]!">{label}</span>
+      </div>
+    </motion.div>
+  )
+}
+
+// Shown instead of the form once the RSVP deadline has passed.
+function Closed() {
+  const text = `Namaste! I missed the RSVP date for ${couple.bride.first} & ${couple.groom.first}'s wedding — is it still possible to join?`
+  return (
+    <motion.div key="closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center py-6 text-center">
+      <h3 className="font-display text-4xl text-ink">RSVPs have closed</h3>
+      <p className="mt-4 max-w-sm text-ink/65">
+        Replies closed on {wedding.rsvpBy}. Still hoping to join us? Send {wedding.rsvpContact} a message and the family will do their best.
+      </p>
+      <div className="mt-8">
+        <Button href={whatsAppLink(wedding.rsvpWhatsApp, text)} variant="ink" icon={MessageCircle}>
+          Message {wedding.rsvpContact}
+        </Button>
+      </div>
+    </motion.div>
+  )
+}
+
+// Card shown after the RSVP is saved.
+// With a server the reply has already reached the family. Without one, the guest sends it on WhatsApp.
+function Success({ data, delivered, onEdit }) {
   const yes = data.attending === 'yes'
   const chosen = events.filter((e) => data.events.includes(e.id))
   const summary = yes
     ? `Namaste! ${data.name} here — joyfully accepting the invitation to ${couple.bride.first} & ${couple.groom.first}'s wedding (${data.guests} guest${data.guests > 1 ? 's' : ''}) for ${chosen.map((e) => e.name).join(', ')}. ${couple.hashtag}`
     : `Namaste! ${data.name} here — with love and regret, I won't be able to attend ${couple.bride.first} & ${couple.groom.first}'s wedding. Sending all my blessings! ${couple.hashtag}`
+  const plan = yes ? `${data.guests} guest${data.guests > 1 ? 's' : ''} for ${chosen.length === events.length ? 'every celebration' : chosen.map((e) => e.name).join(', ')}` : ''
 
   return (
     <motion.div
@@ -85,43 +123,44 @@ function Success({ data, onEdit }) {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="flex flex-col items-center py-6 text-center"
     >
-      <motion.div
-        initial={{ scale: 2.4, rotate: -30, opacity: 0 }}
-        animate={{ scale: 1, rotate: -8, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.15 }}
-        className="grid size-28 place-items-center rounded-full border-2 border-dashed border-sindoor/70 text-sindoor"
-      >
-        <div className="text-center">
-          <Check size={30} className="mx-auto" strokeWidth={2.2} />
-          <span className="eyebrow mt-1 block text-[0.55rem]!">Received</span>
-        </div>
-      </motion.div>
+      <Stamp label={delivered ? 'Received' : 'Saved'} />
       <h3 className="mt-8 font-display text-4xl text-ink">
         {yes ? 'We can’t wait to see you' : 'You’ll be missed'}, <span className="font-serif text-sindoor italic">{data.name.split(' ')[0]}</span>
       </h3>
       <p className="mt-4 max-w-sm text-ink/65">
-        {yes
-          ? `We’ve saved ${data.guests} seat${data.guests > 1 ? 's' : ''} for ${chosen.length === events.length ? 'every celebration' : chosen.map((e) => e.name).join(', ')}. A detailed itinerary will reach you on WhatsApp.`
-          : 'Thank you for letting us know. Your blessings mean the world — leave one for us below.'}
+        {delivered
+          ? yes
+            ? `Your reply has reached the family: ${plan}.`
+            : 'Thank you for letting us know. Your blessings mean the world — leave one for us below.'
+          : `One last step: send your reply to ${wedding.rsvpContact} on WhatsApp so the family has it.${yes ? ` (${plan})` : ''}`}
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Button href={`https://wa.me/?text=${encodeURIComponent(summary)}`} variant="ink" icon={MessageCircle}>
-          Share on WhatsApp
-        </Button>
+        {delivered ? (
+          <Button href={`https://wa.me/?text=${encodeURIComponent(summary)}`} variant="ink" icon={MessageCircle}>
+            Share on WhatsApp
+          </Button>
+        ) : (
+          <Button href={whatsAppLink(wedding.rsvpWhatsApp, rsvpMessage(data))} variant="ink" icon={MessageCircle}>
+            Send to {wedding.rsvpContact}
+          </Button>
+        )}
         {yes && (
           <Button variant="ghost" icon={CalendarPlus} className="text-ink" onClick={() => downloadIcs(chosen)}>
             Save dates
           </Button>
         )}
       </div>
-      <button type="button" onClick={onEdit} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-ink/55 uppercase underline-offset-4 hover:text-ink hover:underline">
-        <Pencil size={13} /> Edit my response
-      </button>
+      {!rsvpClosed() && (
+        <button type="button" onClick={onEdit} className="mt-6 inline-flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-ink/55 uppercase underline-offset-4 hover:text-ink hover:underline">
+          <Pencil size={13} /> Edit my response
+        </button>
+      )}
     </motion.div>
   )
 }
 
-// RSVP form. Answers are saved in this browser (no server yet), so a guest sees their reply on return.
+// RSVP form. Replies go to the server when one is set up (see lib/rsvp.js), otherwise to the
+// family on WhatsApp. The reply is also saved in this browser, so a guest sees it on return.
 export default function Rsvp() {
   const [saved] = useState(loadSaved)
   const [form, setForm] = useState(saved ?? EMPTY)
@@ -144,14 +183,23 @@ export default function Rsvp() {
     setErrors(found)
     if (Object.keys(found).length) return
     setStatus('sending')
-    // Short pause to feel like sending; swap this for a real API call later.
-    await new Promise((r) => setTimeout(r, 1400))
-    save(STORAGE_KEY, form)
+    try {
+      await sendRsvp(form)
+    } catch {
+      setStatus('idle')
+      toast(`Could not send — please try again, or message ${wedding.rsvpContact} on WhatsApp`)
+      return
+    }
+    const next = { ...form, delivered: hasServer }
+    setForm(next)
+    save(STORAGE_KEY, next)
     setStatus('done')
-    toast(form.attending === 'yes' ? 'RSVP sent — see you in Udaipur!' : 'Thank you for letting us know')
+    if (hasServer) toast(form.attending === 'yes' ? `RSVP sent — see you in ${wedding.place}!` : 'Thank you for letting us know')
+    else toast(`Saved — now send it to ${wedding.rsvpContact} on WhatsApp`)
   }
 
   const attending = form.attending === 'yes'
+  const closed = rsvpClosed()
 
   return (
     <section id="rsvp" className="relative overflow-hidden bg-wine py-28 sm:py-36">
@@ -170,8 +218,7 @@ export default function Rsvp() {
             <RevealText text="grace us?" delay={0.1} className="font-serif text-marigold italic" />
           </h2>
           <p className="mt-8 max-w-md leading-relaxed text-ivory/70">
-            Your answer helps us plan everything from the boats to Jagmandir to the number of jalebis. Please respond by{' '}
-            <span className="text-gold">{wedding.rsvpBy}</span>.
+            {wedding.rsvpNote} {closed ? 'Replies closed on' : 'Please respond by'} <span className="text-gold">{wedding.rsvpBy}</span>.
           </p>
           <div className="mt-10 flex items-center gap-5 text-gold/80">
             <Lotus size={52} />
@@ -193,12 +240,9 @@ export default function Rsvp() {
 
           <AnimatePresence mode="wait">
             {status === 'done' ? (
-              <Success
-                data={form}
-                onEdit={() => {
-                  setStatus('idle')
-                }}
-              />
+              <Success data={form} delivered={Boolean(form.delivered)} onEdit={() => setStatus('idle')} />
+            ) : closed ? (
+              <Closed />
             ) : (
               <motion.form key="form" noValidate onSubmit={submit} exit={{ opacity: 0, y: -10 }} className="relative space-y-9 pt-6">
                 <LayoutGroup id="attending">

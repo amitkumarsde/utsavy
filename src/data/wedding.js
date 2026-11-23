@@ -20,15 +20,46 @@ export const couple = {
   },
   hashtag: '#KabirFoundHisIsh',
   monogram: 'I&K',
+  // Small badge under the couple's photo
+  since: 'est. 2019 · Mumbai',
+  // Family names used in the sign-off
+  families: 'Rathore & Malhotra',
 }
 
 export const wedding = {
   // Time of the pheras (7:12 PM, India time)
   date: '2026-12-12T19:12:00+05:30',
+  time: '7:12 PM IST',
   displayDate: 'Saturday, 12 December 2026',
   shortDate: '12 · 12 · 2026',
+  day: '12',
+  month: 'Dec',
+  // Text that runs around the round date seal
+  sealText: 'TWELVE DECEMBER ✦ TWO THOUSAND TWENTY SIX ✦ UDAIPUR ✦ ',
+  place: 'Udaipur',
+  region: 'Rajasthan, India',
   city: 'Udaipur, Rajasthan',
-  rsvpBy: '15 November 2026',
+  // Venue of the main ceremony (a key of `venues` below)
+  venue: 'udaivilas',
+
+  // RSVP: shown date, and the moment the form closes (end of that day, India time)
+  rsvpBy: '30 November 2026',
+  rsvpDeadline: '2026-11-30T23:59:59+05:30',
+  rsvpNote: 'Your answer helps us plan everything from the boats to Jagmandir to the number of jalebis.',
+  // WhatsApp number that receives RSVPs while no server is connected (see README)
+  rsvpWhatsApp: '+91 98765 43210',
+  rsvpContact: 'Rohan',
+}
+
+// Browser tab title and link-preview text (filled into index.html at build time)
+export const meta = {
+  title: 'Ishaani & Kabir · 12.12.2026 · Udaipur',
+  description:
+    'You are invited to the wedding of Ishaani Rathore and Kabir Malhotra — four days of celebration on the shores of Lake Pichola, Udaipur. 10–13 December 2026.',
+  shareTitle: 'Ishaani & Kabir — Ek Raat, Udaipur Mein',
+  shareDescription: 'Mehendi, Haldi, Sangeet, Shubh Vivah & Reception · 10–13 December 2026 · Udaipur. Kindly RSVP.',
+  noscript:
+    'Ishaani & Kabir request the pleasure of your company · 12 December 2026 · The Oberoi Udaivilas, Udaipur. Please enable JavaScript to view the full invitation.',
 }
 
 export const families = [
@@ -49,12 +80,20 @@ export const families = [
 export const invitationText =
   'With joy in our hearts and the blessings of our elders, we invite you to witness two families become one — as Ishaani and Kabir take their seven pheras on the shores of Lake Pichola, beneath a December moon.'
 
-// Unsplash photo ids
+// Words in the invitation text shown in red italics (as written, lower case)
+export const invitationAccents = ['pheras', 'pichola,', 'moon.', 'one']
+
+// Unsplash photo ids, and descriptions for screen readers
 export const images = {
   hero: 'photo-1770665567859-129bbd144038',
+  heroAlt: 'Lake Pichola and the Lake Palace in Udaipur at dusk',
   couple: 'photo-1722952934661-dde241aeb591',
+  coupleAlt: 'Ishaani in a red lehenga and Kabir in an ivory sherwani under a canopy of lights',
   diyas: 'photo-1783255166190-bee5e9e1294d',
 }
+
+// Big headline of the story section, one entry per line (the last line is in italics)
+export const storyTitle = ['How a borrowed', 'umbrella became', 'a lifetime']
 
 export const story = [
   {
@@ -239,6 +278,10 @@ export const travel = [
   { icon: 'hotel', label: 'Rooms held at The Leela & Udaivilas', detail: 'Quote “Rathore–Malhotra Wedding”' },
   { icon: 'ship', label: 'Boats to Jagmandir', detail: 'Every 15 min from Rameshwar Ghat' },
 ]
+
+// Number shown on the diya counter before the guest lights theirs.
+// Without a server it cannot count other guests, so set it to a real number (or 0).
+export const diyaCount = 1247
 
 export const blessingsSeed = [
   { name: 'Dadi Sa', relation: 'Bride’s grandmother', text: 'Sada suhagan raho, meri laado. May your home always smell of ghee and laughter.' },

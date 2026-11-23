@@ -1,5 +1,9 @@
 // Safe helpers for browser storage and the clipboard.
 // Storage can fail (private mode, blocked cookies), so errors are ignored.
+import { slug } from './text'
+
+// Saved-data key unique to this couple, e.g. "ishaani-kabir:rsvp"
+export const storageKey = (name) => `${slug}:${name}`
 
 export function load(key, fallback) {
   try {

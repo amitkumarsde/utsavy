@@ -1,9 +1,10 @@
 import { AnimatePresence, motion, useMotionValue, useSpring, useVelocity, useTransform } from 'framer-motion'
 import { CalendarPlus, Clock, MapPin, Navigation, Plus, Shirt } from 'lucide-react'
 import { useState } from 'react'
-import { events, venues } from '../data/wedding'
+import { events, venues, wedding } from '../data/wedding'
 import { googleCalendarUrl, mapsDirectionsUrl } from '../lib/calendar'
 import { img } from '../lib/images'
+import { capitalize, eventDays, numberWord } from '../lib/text'
 import Picture from '../components/ui/Picture'
 import SectionHeading from '../components/ui/SectionHeading'
 import Button from '../components/ui/Button'
@@ -44,7 +45,7 @@ function EventDetails({ event }) {
                 <Clock size={13} /> When
               </dt>
               <dd className="mt-2 font-display text-lg text-ink">
-                {event.day}, {event.date} 2026
+                {event.day}, {event.date} {event.start.slice(0, 4)}
               </dd>
               <dd className="text-sm text-ink/65">{event.time}</dd>
             </div>
@@ -184,7 +185,8 @@ function HoverPreview({ index, x, y }) {
 
 // All five wedding events as a big list, one colour per event.
 export default function Events() {
-  const [open, setOpen] = useState('vivah')
+  // Start with the main ceremony opened
+  const [open, setOpen] = useState(() => (events.find((e) => e.start <= wedding.date && wedding.date <= e.end) ?? events[0]).id)
   const [hovered, setHovered] = useState(null)
   const fine = useFinePointer()
   const x = useMotionValue(0)
@@ -198,7 +200,7 @@ export default function Events() {
       <ArchEdge className="absolute bottom-full left-0" />
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-          <SectionHeading index="05" label="The Celebrations" deva="उत्सव" title="Four days," italic="five celebrations" tone="text-gold-deep" className="text-ink" />
+          <SectionHeading index="05" label="The Celebrations" deva="उत्सव" title={`${capitalize(numberWord(eventDays))} day${eventDays > 1 ? 's' : ''},`} italic={`${numberWord(events.length)} celebration${events.length > 1 ? 's' : ''}`} tone="text-gold-deep" className="text-ink" />
           <p className="max-w-sm text-ink/60 lg:pb-4 lg:text-right">
             From the first stroke of henna to the last firework over the City Palace — tap any celebration for timings, venue and what to wear.
           </p>

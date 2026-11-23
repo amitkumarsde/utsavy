@@ -1,7 +1,7 @@
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import { ArrowRight, MapPin } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
-import { story } from '../data/wedding'
+import { story, storyTitle } from '../data/wedding'
 import { ArchOutline } from '../components/ui/Ornaments'
 import Picture from '../components/ui/Picture'
 import RevealText from '../components/ui/RevealText'
@@ -91,11 +91,15 @@ function HorizontalStory() {
               <span className="font-deva text-sm opacity-80">· कहानी</span>
             </p>
             <h2 className="mt-6 font-display text-[clamp(3rem,6.4vw,7rem)] leading-[0.95] tracking-[-0.02em] text-ivory">
-              <RevealText text="How a borrowed" />
-              <br />
-              <RevealText text="umbrella became" delay={0.1} />
-              <br />
-              <RevealText text="a lifetime" delay={0.2} className="font-serif text-marigold italic" />
+              {storyTitle.map((line, i) => {
+                const last = i === storyTitle.length - 1
+                return (
+                  <span key={line}>
+                    {i > 0 && <br />}
+                    <RevealText text={line} delay={i * 0.1} className={last ? 'font-serif text-marigold italic' : ''} />
+                  </span>
+                )
+              })}
             </h2>
             <p className="mt-10 flex items-center gap-3 text-sm text-ivory/50">
               Keep scrolling — the thread will lead you <ArrowRight size={16} className="text-gold" />
@@ -142,13 +146,13 @@ function HorizontalStory() {
           </div>
         </motion.div>
 
-        {/* Progress bar from 2019 to 2026 */}
+        {/* Progress bar from the first chapter's year to the last */}
         <div className="absolute inset-x-[8vw] bottom-8 flex items-center gap-4">
-          <span className="eyebrow text-ivory/40">2019</span>
+          <span className="eyebrow text-ivory/40">{story[0].year}</span>
           <div className="relative h-px flex-1 bg-ivory/10">
             <motion.div style={{ scaleX: scrollYProgress }} className="absolute inset-0 origin-left bg-gold" />
           </div>
-          <span className="eyebrow text-ivory/40">2026</span>
+          <span className="eyebrow text-ivory/40">{story.at(-1).year}</span>
         </div>
       </div>
     </section>
@@ -170,8 +174,8 @@ function VerticalStory() {
         <span className="font-deva text-sm opacity-80">· कहानी</span>
       </p>
       <h2 className="mt-6 font-display text-[clamp(2.8rem,11vw,5rem)] leading-[0.95] tracking-[-0.02em] text-ivory">
-        <RevealText text="How a borrowed umbrella became" />{' '}
-        <RevealText text="a lifetime" delay={0.2} className="font-serif text-marigold italic" />
+        <RevealText text={storyTitle.slice(0, -1).join(' ')} />{' '}
+        <RevealText text={storyTitle.at(-1)} delay={0.2} className="font-serif text-marigold italic" />
       </h2>
 
       <div ref={ref} className="relative mt-16 pl-8">

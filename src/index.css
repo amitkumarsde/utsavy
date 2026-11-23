@@ -86,12 +86,21 @@
 @media (pointer: fine) {
   html.has-cursor,
   html.has-cursor a,
-  html.has-cursor button {
+  html.has-cursor button,
+  html.has-cursor [data-cursor] {
+    /* [data-cursor] also covers elements with their own cursor class, like the draggable gallery photo */
     cursor: none;
   }
   html.has-cursor input,
   html.has-cursor textarea {
     cursor: text;
+  }
+  /* Normal cursor inside the phone preview, since the custom one cannot follow into the iframe. */
+  html.has-cursor [data-native-cursor] {
+    cursor: auto;
+  }
+  html.has-cursor [data-native-cursor] button {
+    cursor: pointer;
   }
 }
 
@@ -178,6 +187,14 @@
 
 .spin-slow {
   animation: spin-slow 120s linear infinite;
+}
+
+/* Inside the phone frame, hide the desktop scrollbar so the full phone width is used. */
+html.in-frame {
+  scrollbar-width: none;
+}
+html.in-frame::-webkit-scrollbar {
+  display: none;
 }
 
 .no-scrollbar {

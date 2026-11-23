@@ -75,14 +75,14 @@ export default function Couple() {
           <div className="relative aspect-2/3">
             <Picture
               id={images.couple}
-              alt="Ishaani in a red lehenga and Kabir in an ivory sherwani under a canopy of lights"
+              alt={images.coupleAlt}
               sizes="(min-width: 1024px) 420px, 78vw"
               className="arch absolute inset-0"
               imgStyle={{ y: imgY, scale: 1.18 }}
             />
             <ArchOutline className="-inset-3 h-[calc(100%+1.5rem)] w-[calc(100%+1.5rem)] text-gold/60" />
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-gold/40 bg-wine px-5 py-2 font-serif text-lg whitespace-nowrap text-gold italic">
-              est. 2019 · Mumbai
+              {couple.since}
             </div>
           </div>
         </motion.div>

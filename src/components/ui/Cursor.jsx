@@ -23,7 +23,7 @@ export default function Cursor() {
       y.set(e.clientY)
       const target = e.target instanceof Element ? e.target : null
       const hit = target?.closest(INTERACTIVE)
-      const overText = target?.closest('input, textarea, iframe')
+      const overText = target?.closest('input, textarea, iframe, [data-native-cursor]')
       const label = hit?.getAttribute('data-cursor') ?? ''
       const dark = Boolean(target?.closest('[data-theme="light"]'))
       setState((s) =>

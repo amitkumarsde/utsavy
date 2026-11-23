@@ -11,15 +11,22 @@ function remaining(target) {
   }
 }
 
-// Days, hours, minutes and seconds left until `iso`; updates every second.
-export function useCountdown(iso) {
+// Days, hours, minutes and seconds left until `iso`; updates every second while `active`.
+export function useCountdown(iso, active = true) {
   const target = new Date(iso).getTime()
   const [time, setTime] = useState(() => remaining(target))
 
   useEffect(() => {
-    const id = setInterval(() => setTime(remaining(target)), 1000)
-    return () => clearInterval(id)
-  }, [target])
+    if (!active) return
+    const tick = () => setTime(remaining(target))
+    // Catch up straight away after being paused, then every second.
+    const first = setTimeout(tick, 0)
+    const id = setInterval(tick, 1000)
+    return () => {
+      clearTimeout(first)
+      clearInterval(id)
+    }
+  }, [target, active])
 
   return time
 }

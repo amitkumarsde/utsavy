@@ -1,8 +1,10 @@
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, useSpring } from 'framer-motion'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { couple, navLinks, wedding } from '../../data/wedding'
 import { img } from '../../lib/images'
+import { rsvpClosed } from '../../lib/rsvp'
 import { useSmoothScroll, useSound } from '../../context'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { Sparkle } from '../ui/Ornaments'
 
 const EASE = [0.22, 1, 0.36, 1]
@@ -24,7 +26,7 @@ function SoundBars({ playing }) {
 }
 
 // Full-screen menu with a photo preview of the hovered link (desktop).
-function Menu({ onClose, onNavigate }) {
+function Menu({ onClose, onNavigate, panelRef }) {
   const [hovered, setHovered] = useState(navLinks[0])
 
   useEffect(() => {
@@ -35,7 +37,11 @@ function Menu({ onClose, onNavigate }) {
 
   return (
     <motion.div
+      ref={panelRef}
       id="site-menu"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site menu"
       data-lenis-prevent
       initial={{ clipPath: 'circle(0% at 100% 0%)' }}
       animate={{ clipPath: 'circle(150% at 100% 0%)' }}
@@ -79,14 +85,14 @@ function Menu({ onClose, onNavigate }) {
             className="mt-10 flex flex-wrap items-center justify-between gap-5 lg:hidden"
           >
             <p className="font-serif text-lg text-gold italic">
-              {wedding.shortDate} · Udaipur
+              {wedding.shortDate} · {wedding.place}
             </p>
             <button
               type="button"
               onClick={() => onNavigate('rsvp')}
               className="rounded-full bg-gold px-6 py-3 text-[0.7rem] font-bold tracking-[0.2em] text-ink uppercase"
             >
-              RSVP by {wedding.rsvpBy.replace(' 2026', '')}
+              {rsvpClosed() ? 'RSVP' : `RSVP by ${wedding.rsvpBy.replace(/\s\d{4}$/, '')}`}
             </button>
           </motion.div>
         </nav>
@@ -128,6 +134,11 @@ export default function Nav({ visible }) {
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30 })
   const { scrollTo, lock, unlock } = useSmoothScroll()
   const { playing, toggle } = useSound()
+  const headerRef = useRef(null)
+  const menuRef = useRef(null)
+
+  // While the menu is open, Tab moves only through the menu and the top bar.
+  useFocusTrap(open, [menuRef, headerRef])
 
   // Freeze the page only while the menu is open, so a chosen
   // section can be scrolled to while the menu is still closing.
@@ -157,6 +168,9 @@ export default function Nav({ visible }) {
       <motion.div style={{ scaleX: progress }} className="fixed inset-x-0 top-0 z-95 h-0.5 origin-left bg-linear-to-r from-sindoor via-marigold to-gold" />
 
       <motion.header
+        ref={headerRef}
+        // Hidden bar must not be reachable with Tab (e.g. while the doors are closed)
+        inert={!visible}
         initial={{ y: -100, opacity: 0 }}
         animate={visible ? { y: hidden && !open ? -100 : 0, opacity: 1 } : { y: -100, opacity: 0 }}
         transition={{ duration: 0.7, ease: EASE }}
@@ -174,7 +188,7 @@ export default function Nav({ visible }) {
         </button>
 
         <p className={`${chip} eyebrow hidden h-12 items-center px-5 text-ivory/70 lg:flex`}>
-          {wedding.shortDate} <span className="mx-3 text-gold">·</span> Udaipur
+          {wedding.shortDate} <span className="mx-3 text-gold">·</span> {wedding.place}
         </p>
 
         <div className="flex items-center gap-2">
@@ -211,7 +225,7 @@ export default function Nav({ visible }) {
         </div>
       </motion.header>
 
-      <AnimatePresence>{open && <Menu onClose={close} onNavigate={go} />}</AnimatePresence>
+      <AnimatePresence>{open && <Menu onClose={close} onNavigate={go} panelRef={menuRef} />}</AnimatePresence>
     </>
   )
 }

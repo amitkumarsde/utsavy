@@ -8,6 +8,7 @@ import SectionHeading from '../components/ui/SectionHeading'
 import Marquee from '../components/ui/Marquee'
 import { Sparkle } from '../components/ui/Ornaments'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import { useSmoothScroll } from '../context'
 
 const EASE = [0.22, 1, 0.36, 1]
@@ -21,12 +22,17 @@ const OFFSETS_NARROW = [
   [30, -50],
   [-20, 60],
 ]
-const MARQUEE_WORDS = [couple.bride.first, couple.groom.first, wedding.shortDate, 'Udaipur', 'शुभ विवाह']
+const MARQUEE_WORDS = [couple.bride.first, couple.groom.first, wedding.shortDate, wedding.place, 'शुभ विवाह']
 
 // Full-screen photo viewer: arrows, keyboard, swipe and thumbnails.
 function Lightbox({ index, onClose, onStep }) {
   const item = gallery[index]
   const [direction, setDirection] = useState(0)
+  const dialogRef = useRef(null)
+  const closeRef = useRef(null)
+
+  // Focus starts on Close, stays inside the viewer, and returns to the photo afterwards.
+  useFocusTrap(true, [dialogRef], closeRef)
 
   const step = useCallback(
     (dir) => {
@@ -48,6 +54,7 @@ function Lightbox({ index, onClose, onStep }) {
 
   return (
     <motion.div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-label={item.caption}
@@ -64,6 +71,7 @@ function Lightbox({ index, onClose, onStep }) {
           {String(index + 1).padStart(2, '0')} <span className="text-ivory/30">/ {String(gallery.length).padStart(2, '0')}</span>
         </span>
         <button
+          ref={closeRef}
           type="button"
           onClick={onClose}
           aria-label="Close gallery"
@@ -97,6 +105,7 @@ function Lightbox({ index, onClose, onStep }) {
               else if (info.offset.x > 70) step(-1)
             }}
             onClick={(e) => e.stopPropagation()}
+            data-cursor="Drag"
             className="max-h-[72vh] max-w-full cursor-grab touch-pan-y rounded-sm object-contain shadow-2xl shadow-black/60 active:cursor-grabbing"
             draggable={false}
           />

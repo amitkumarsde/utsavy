@@ -4,9 +4,12 @@ import SmoothScroll from './components/providers/SmoothScroll'
 import Sound from './components/providers/Sound'
 import Toast from './components/providers/Toast'
 import Nav from './components/layout/Nav'
+import PhonePreview from './components/layout/PhonePreview'
 import Cursor from './components/ui/Cursor'
 import { SvgDefs } from './components/ui/Ornaments'
 import { useSound } from './context'
+import { IN_FRAME } from './lib/frame'
+import { storageKey } from './lib/storage'
 import Gateway from './sections/Gateway'
 import Hero from './sections/Hero'
 
@@ -14,7 +17,7 @@ import Hero from './sections/Hero'
 const loadChapters = () => import('./sections/Chapters')
 const Chapters = lazy(loadChapters)
 
-const OPENED_KEY = 'ishaani-kabir:opened'
+const OPENED_KEY = storageKey('opened')
 
 // Add `?intro` to the URL to always see the opening doors.
 function initialPhase() {
@@ -68,7 +71,8 @@ function Invite() {
         {phase !== 'open' && <Gateway key="gateway" onOpen={handleOpen} onDone={handleDone} />}
       </AnimatePresence>
 
-      <main aria-hidden={phase === 'gate' ? true : undefined}>
+      {/* `inert` hides the page from screen readers and from Tab while the doors are closed */}
+      <main inert={phase === 'gate'}>
         <Hero play={phase !== 'gate'} burst={burst} />
         <Suspense fallback={<div className="paper h-screen" />}>
           <Chapters />
@@ -85,6 +89,8 @@ export default function App() {
         <Sound>
           <Toast>
             <Invite />
+            {/* The phone preview page itself does not need another phone button */}
+            {!IN_FRAME && <PhonePreview />}
           </Toast>
         </Sound>
       </SmoothScroll>

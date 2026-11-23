@@ -96,15 +96,28 @@ utsavy/
 ## Make It Your Own
 
 - Open `src/data/wedding.js`.
-- Change names, families, dates, story, events, venues, photos and blessings.
+- Change names, families, dates, story, events, venues, photos, blessings, the RSVP deadline and the RSVP WhatsApp number.
+- The page title and link-preview text in `index.html` are filled in from the same file when the site runs or builds.
 - No component code needs to change.
 - Colours and fonts live at the top of `src/index.css`.
 
 ---
 
+## RSVPs
+
+Replies always reach the family, in one of two ways:
+
+- **With a server:** set `VITE_RSVP_ENDPOINT` (in a `.env` file, or in Vercel's environment variables) to a URL that accepts a JSON `POST`. Every reply is sent there; if sending fails, the guest sees an error and can try again.
+- **Without a server (default):** the reply is saved in the guest's browser and the thank-you card asks the guest to send it on WhatsApp to `rsvpWhatsApp` from `src/data/wedding.js`, with all the details already typed in.
+
+After `rsvpDeadline` the form closes and guests are offered a WhatsApp message to the family instead.
+
+---
+
 ## Good to Know
 
-- **RSVPs, diyas and blessings are saved only in the guest's own browser.** There is no server yet. The RSVP send step in `src/sections/Rsvp.jsx` is the one place to connect a real API.
+- **Diyas and blessings are saved only in the guest's own browser.** The diya counter starts from `diyaCount` in `src/data/wedding.js`; set it to a real number (or 0).
+- **Phone view:** on large screens a "Phone view" tab on the right edge shows the invite inside a standard iPhone screen (390 × 844).
 - Photos load from Unsplash, so an internet connection is needed.
 - Music starts only after a tap, because browsers block sound that plays by itself.
 - The couple, families and story are made up for this demo.
